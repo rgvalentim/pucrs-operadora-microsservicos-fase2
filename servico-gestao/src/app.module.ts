@@ -11,6 +11,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 // Entidades TypeORM
 import { ClienteTypeOrmEntity } from './persistencia/entidades/cliente.typeorm.entity';
@@ -42,6 +43,23 @@ import { ServicoSeeding } from './seeding.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ClientsModule.registerAsync([
+      {
+        name: 'MENSAGERIA_RABBITMQ',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (servicoConfiguracao: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [servicoConfiguracao.get<string>('RABBITMQ_URL') || ''],
+            queue: 'fila_eventos_operadora',
+            queueOptions: {
+              durable: true,
+            },
+          },
+        }),
+      },
+    ]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

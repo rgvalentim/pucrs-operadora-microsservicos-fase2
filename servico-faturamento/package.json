@@ -1,5 +1,5 @@
 {
-  "name": "servico-gestao",
+  "name": "servico-faturamento",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -21,17 +21,14 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
-    "@nestjs/config": "^4.0.4",
+    "@nestjs/config": "^12.0.0",
     "@nestjs/core": "^11.0.1",
-    "@nestjs/microservices": "^11.2.3",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/typeorm": "^11.0.3",
-    "amqp-connection-manager": "^5.0.0",
-    "amqplib": "^2.0.1",
-    "mysql2": "^3.23.4",
+    "@nestjs/typeorm": "^12.0.1",
+    "mysql2": "^3.24.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^1.1.0"
+    "typeorm": "^1.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

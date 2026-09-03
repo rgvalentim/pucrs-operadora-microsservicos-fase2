@@ -9,6 +9,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import type { IRepAssinaturas } from '../dominio/repositorios/irep-assinaturas';
 import { Assinatura } from '../dominio/entidades/assinatura.entity';
 import { CriarAssinaturaDto } from '../interface/dtos/criar-assinatura.dto';
@@ -18,6 +19,9 @@ export class CriarAssinaturaUc {
   constructor(
     @Inject('IRepAssinaturas')
     private readonly repAssinaturas: IRepAssinaturas,
+
+    // A nova injeção do Broker de Mensagens:
+    @Inject('MENSAGERIA_RABBITMQ') private readonly rabbitClient: ClientProxy,
   ) {}
 
   async executar(dados: CriarAssinaturaDto): Promise<Assinatura> {
@@ -38,6 +42,22 @@ export class CriarAssinaturaUc {
       dados.descricao,
     );
 
-    return await this.repAssinaturas.cadastrar(novaAssinatura);
+    // 1. Salvar no banco ANTES de emitir o evento
+    // O await garante que o sistema só continue se o banco confirmar a gravação.
+    const assinaturaSalva = await this.repAssinaturas.cadastrar(novaAssinatura);
+
+    // 2. Disparo do Evento (Publish)
+    // Note que o bloco antigo com o "999" não existe mais.
+    // Pegamos o ID real (assinaturaSalva.id) que o banco de dados acabou de gerar.
+    this.rabbitClient.emit('AssinaturaCriada', {
+      codAss: assinaturaSalva.codigo,
+      codCli: assinaturaSalva.codCli,
+      codPlano: assinaturaSalva.codPlano,
+      status: 'ATIVA',
+      timestamp: new Date().toISOString(),
+    });
+
+    // 3. Retorno da API para o Controller
+    return assinaturaSalva;
   }
 }
