@@ -18,7 +18,10 @@ export class AppModule {
           changeOrigin: true,
         }),
       )
-      .forRoutes({ path: 'gestao/*', method: RequestMethod.ALL });
+      .forRoutes(
+        { path: 'gestao', method: RequestMethod.ALL },
+        { path: 'gestao/{*path}', method: RequestMethod.ALL },
+      );
 
     // ---------------------------------------------------------
     // Roteamento para o ServicoFaturamento (Fase 2) - Porta 3002
@@ -30,8 +33,10 @@ export class AppModule {
           changeOrigin: true,
         }),
       )
-      //o * abaixo garante que os parâmetros na URL sejam interpretados como pertecentes a essa rota
-      .forRoutes({ path: 'registrarpagamento*', method: RequestMethod.ALL });
+      .forRoutes(
+        { path: 'registrarpagamento', method: RequestMethod.ALL },
+        { path: 'registrarpagamento/{*path}', method: RequestMethod.ALL },
+      );
 
     // ---------------------------------------------------------
     // Roteamento para o ServicoPlanosAtivos (Fase 2) - Porta 3003
@@ -43,6 +48,9 @@ export class AppModule {
           changeOrigin: true,
         }),
       )
-      .forRoutes({ path: 'planosativos*', method: RequestMethod.ALL });
+      .forRoutes(
+        { path: 'planosativos', method: RequestMethod.ALL },
+        { path: 'planosativos/{*path}', method: RequestMethod.ALL },
+      );
   }
 }

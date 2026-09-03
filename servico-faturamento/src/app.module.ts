@@ -2,6 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+// Importações das Entidades e Repositórios
+import { PagamentoTypeOrmEntity } from './persistencia/entidades/pagamento.typeorm.entity';
+import { RepositorioPagamentos } from './persistencia/repositorio-pagamentos';
+import { FaturamentoController } from './interface/faturamento.controller';
+import { RegistrarPagamentoUc } from './aplicacao/registrar-pagamento.usecase';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -17,12 +23,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: servicoConfiguracao.get<string>('DB_USUARIO'),
         password: servicoConfiguracao.get<string>('DB_SENHA'),
         database: servicoConfiguracao.get<string>('DB_NOME'),
-        entities: [], // Array vazio. Preencheremos no próximo passo.
-        synchronize: true, // Sincronização automática para agilidade no ambiente acadêmico
+        // 1. Ensinamos o TypeORM a criar a tabela 'pagamentos'
+        entities: [PagamentoTypeOrmEntity],
+        synchronize: true,
       }),
     }),
+    // 2. Disponibiliza a entidade para o InjectRepository funcionar dentro do nosso RepositorioPagamentos
+    TypeOrmModule.forFeature([PagamentoTypeOrmEntity]),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [FaturamentoController],
+  providers: [
+    // 3. Injeção de Dependência (Contrato -> Implementação)
+    {
+      provide: 'IRepPagamentos',
+      useClass: RepositorioPagamentos,
+    },
+    RegistrarPagamentoUc,
+  ],
 })
 export class AppModule {}
